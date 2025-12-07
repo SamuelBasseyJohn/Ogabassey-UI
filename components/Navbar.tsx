@@ -323,7 +323,7 @@ export const Navbar: React.FC = () => {
                 {/* IMEI Checker */}
                 <Link to="/imei-check" className="flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-red-600 transition-colors px-1 py-1">
                     <ScanBarcode size={18} />
-                    IMEI Checker
+                    IMEI Check
                 </Link>
 
                 <div className="h-4 w-px bg-gray-200"></div>

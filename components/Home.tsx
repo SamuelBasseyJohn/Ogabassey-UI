@@ -1,10 +1,29 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Hero } from './Hero';
-import { InteractiveProductGrid } from './InteractiveProductGrid';
+import { ProductFilters } from './ProductFilters';
+import { FeaturedProducts } from './FeaturedProducts';
 import { BannerCarousel } from './BannerCarousel';
 
+const CATEGORIES = ['All', 'Phones', 'Gaming', 'Laptops', 'Accessories', 'Printers'];
+
 export const Home: React.FC = () => {
+  const navigate = useNavigate();
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [minPrice, setMinPrice] = useState<number>(0);
+  const [maxPrice, setMaxPrice] = useState<number>(3000000);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  const handlePriceChange = (min: number, max: number) => {
+    setMinPrice(min);
+    setMaxPrice(max);
+  };
+
+  const handleCategorySelect = (category: string) => {
+    // Filter in place instead of navigating
+    setSelectedCategory(category);
+  };
+
   return (
     <>
       <Hero />
@@ -14,7 +33,23 @@ export const Home: React.FC = () => {
         <BannerCarousel className="h-40 md:h-52" />
       </div>
 
-      <InteractiveProductGrid />
+      <ProductFilters 
+        categories={CATEGORIES}
+        selectedCategory={selectedCategory}
+        onSelectCategory={handleCategorySelect}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        onPriceChange={handlePriceChange}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+      />
+      
+      <FeaturedProducts 
+        selectedCategory={selectedCategory}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        viewMode={viewMode}
+      />
     </>
   );
 };

@@ -3,6 +3,7 @@ import { X, Send, User, Loader2, Headphones, Sparkles, ChevronRight, ShoppingBag
 import { chatWithGemini, ChatMessage } from '../services/geminiService';
 import { useCart } from '../contexts/CartContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useChat } from '../contexts/ChatContext';
 
 const SUGGESTIONS = [
   { label: "Track my order", icon: <Truck size={14} className="text-red-600" /> },
@@ -44,9 +45,10 @@ const SantaIcon: React.FC<{className?: string}> = ({ className }) => (
 );
 
 export const ChatWidget: React.FC = () => {
+  const { isChatOpen, closeChat, toggleChat } = useChat();
   const { isCartOpen } = useCart();
   const { theme } = useTheme();
-  const [isOpen, setIsOpen] = useState(false);
+  
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -69,7 +71,7 @@ export const ChatWidget: React.FC = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isOpen]);
+  }, [messages, isChatOpen]);
 
   const handleSend = async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -100,7 +102,7 @@ export const ChatWidget: React.FC = () => {
     <div className={`fixed bottom-24 md:bottom-6 right-4 md:right-6 z-[100] font-sans flex flex-col items-end gap-4 transition-all duration-300 ${isCartOpen ? 'opacity-0 pointer-events-none translate-y-4' : 'opacity-100 translate-y-0'}`}>
       
       {/* Chat Window */}
-      {isOpen && (
+      {isChatOpen && (
         <div className={`w-[calc(100vw-32px)] md:w-[400px] h-[calc(100vh-120px)] md:h-[600px] max-h-[calc(100vh-120px)] md:max-h-[600px] bg-white rounded-2xl shadow-2xl border ${isSanta ? 'border-red-200' : 'border-gray-200'} overflow-hidden flex flex-col animate-in slide-in-from-bottom-5 fade-in duration-300 origin-bottom-right ring-1 ring-black/5`}>
           
           {/* Header */}
@@ -124,7 +126,7 @@ export const ChatWidget: React.FC = () => {
             </div>
             <div className="flex items-center gap-1 relative z-10">
                <button 
-                onClick={() => setIsOpen(false)} 
+                onClick={closeChat} 
                 className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                >
                 <X size={20} />
@@ -235,10 +237,10 @@ export const ChatWidget: React.FC = () => {
 
       {/* Floating Toggle Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-14 h-14 md:w-16 md:h-16 rounded-full shadow-xl border border-gray-100 flex items-center justify-center transition-all duration-500 hover:scale-110 group relative ${isOpen ? 'bg-gray-900 text-white rotate-90' : 'bg-white/60 backdrop-blur-md text-red-600 hover:bg-white hover:border-red-100'}`}
+        onClick={toggleChat}
+        className={`w-14 h-14 md:w-16 md:h-16 rounded-full shadow-xl border border-gray-100 flex items-center justify-center transition-all duration-500 hover:scale-110 group relative ${isChatOpen ? 'bg-gray-900 text-white rotate-90' : 'bg-white/60 backdrop-blur-md text-red-600 hover:bg-white hover:border-red-100'}`}
       >
-        {isOpen ? (
+        {isChatOpen ? (
             <X size={28} />
         ) : (
             <>

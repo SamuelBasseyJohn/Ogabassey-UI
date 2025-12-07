@@ -14,6 +14,7 @@ export interface InvoiceOrderData {
     paymentMethod: string;
     shippingAddress: string;
     items: Product[];
+    walletDeduction?: number;
 }
 
 interface InvoiceModalProps {
@@ -38,6 +39,11 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ isOpen, onClose, ord
         }, 1500);
     };
 
+    // Calculate dynamic totals if wallet was used
+    const totalVal = parseFloat(order.total.replace(/[^0-9.]/g, ''));
+    const walletDed = order.walletDeduction || 0;
+    const amountDue = totalVal - walletDed;
+
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
@@ -51,17 +57,17 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ isOpen, onClose, ord
                 </div>
 
                 {/* Preview Area - Scrollable */}
-                <div className="flex-1 overflow-y-auto p-6 bg-gray-100">
+                <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-100">
                     {/* A4 Paper Container */}
-                    <div className="bg-white shadow-xl border border-gray-200 p-12 md:p-16 min-h-[1123px] relative mx-auto max-w-[794px] flex flex-col"> 
+                    <div className="bg-white shadow-xl border border-gray-200 p-8 md:p-12 min-h-[1000px] relative mx-auto max-w-[794px] flex flex-col"> 
                         
                         {/* Decorative Top Bar */}
                         <div className="absolute top-0 left-0 right-0 h-2 bg-red-600"></div>
 
                         {/* Invoice Header */}
-                        <div className="flex justify-between items-start mb-20 mt-4">
+                        <div className="flex flex-col md:flex-row justify-between items-start mb-12 mt-4 gap-6">
                             <div>
-                                <Logo className="h-12 w-auto text-gray-900 mb-6" />
+                                <Logo className="h-10 w-auto text-gray-900 mb-4" />
                                 <div className="text-sm text-gray-500 leading-relaxed font-medium">
                                     <p className="font-bold text-gray-900 text-base mb-1">Ogabassey Ltd.</p>
                                     <p>2 Olaide Tomori St, Ikeja</p>
@@ -69,53 +75,62 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ isOpen, onClose, ord
                                     <p>+234 814 697 8921</p>
                                 </div>
                             </div>
-                            <div className="text-right">
-                                <h1 className="text-5xl font-extrabold text-gray-900 tracking-tight mb-2">INVOICE</h1>
+                            <div className="text-left md:text-right">
+                                <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-2">INVOICE</h1>
                                 <p className="text-gray-500 font-medium text-lg">#{order.id}</p>
+                                <div className="mt-2 inline-block px-3 py-1 bg-red-50 text-red-600 text-xs font-bold uppercase tracking-widest rounded border border-red-100">
+                                    {walletDed > 0 ? 'Partially Paid' : 'Unpaid'}
+                                </div>
                             </div>
                         </div>
 
                         {/* Bill To & Details */}
-                        <div className="grid grid-cols-2 gap-16 mb-16 border-b-2 border-gray-100 pb-16">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 border-b border-gray-100 pb-12">
                             <div>
-                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Billed To</p>
-                                <p className="font-bold text-gray-900 text-xl mb-2">Alex Doe</p>
-                                <p className="text-gray-600 leading-relaxed">{order.shippingAddress}</p>
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Billed To</p>
+                                <p className="font-bold text-gray-900 text-xl mb-1">Alex Doe</p>
+                                <p className="text-gray-600 leading-relaxed max-w-xs">{order.shippingAddress}</p>
                                 <p className="text-gray-600">Lagos, Nigeria</p>
                             </div>
-                            <div className="text-right space-y-8">
-                                <div>
-                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Date Issued</p>
-                                    <p className="font-medium text-gray-900 text-xl">{order.date}</p>
+                            <div className="md:text-right flex flex-col md:items-end justify-between space-y-4">
+                                <div className="grid grid-cols-2 gap-8 md:gap-4">
+                                    <div>
+                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Date Issued</p>
+                                        <p className="font-medium text-gray-900">{order.date}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Due Date</p>
+                                        <p className="font-medium text-gray-900">{order.date}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Total Amount</p>
-                                    <p className="font-bold text-red-600 text-4xl">{order.total}</p>
+                                <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 inline-block min-w-[200px] text-center md:text-right">
+                                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Amount Due</p>
+                                    <p className="font-bold text-red-600 text-2xl">₦{amountDue.toLocaleString()}</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Items Table */}
                         <div className="mb-auto">
-                            <table className="w-full text-left">
+                            <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="border-b-2 border-gray-100">
-                                        <th className="pb-6 text-xs font-bold text-gray-400 uppercase tracking-wider w-1/2">Item Description</th>
-                                        <th className="pb-6 text-center text-xs font-bold text-gray-400 uppercase tracking-wider">Qty</th>
-                                        <th className="pb-6 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Price</th>
-                                        <th className="pb-6 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Amount</th>
+                                    <tr className="border-b border-gray-200">
+                                        <th className="pb-4 text-xs font-bold text-gray-400 uppercase tracking-wider w-[50%]">Item Description</th>
+                                        <th className="pb-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider">Qty</th>
+                                        <th className="pb-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Price</th>
+                                        <th className="pb-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Amount</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50">
                                     {order.items.map((item, index) => (
                                         <tr key={index}>
-                                            <td className="py-8">
-                                                <p className="font-bold text-gray-900 text-lg mb-1">{item.name}</p>
-                                                <p className="text-sm text-gray-500">{item.condition} - {item.brand}</p>
+                                            <td className="py-6 pr-4 align-top">
+                                                <p className="font-bold text-gray-900 text-base mb-1">{item.name}</p>
+                                                <p className="text-xs text-gray-500">{item.condition} - {item.brand}</p>
                                             </td>
-                                            <td className="py-8 text-center text-gray-600 font-medium">1</td>
-                                            <td className="py-8 text-right text-gray-600 font-medium">{item.price}</td>
-                                            <td className="py-8 text-right font-bold text-gray-900 text-lg">{item.price}</td>
+                                            <td className="py-6 text-center text-gray-600 font-medium text-sm align-top pt-7">1</td>
+                                            <td className="py-6 text-right text-gray-600 font-medium text-sm align-top pt-7">{item.price}</td>
+                                            <td className="py-6 text-right font-bold text-gray-900 text-base align-top pt-7">{item.price}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -123,34 +138,48 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ isOpen, onClose, ord
                         </div>
 
                         {/* Totals */}
-                        <div className="flex justify-end mt-16 mb-24">
-                            <div className="w-5/12 space-y-5">
-                                <div className="flex justify-between text-gray-600 text-lg">
+                        <div className="flex flex-col md:flex-row justify-end mt-12 mb-16 pt-6 border-t border-gray-100">
+                            <div className="w-full md:w-5/12 space-y-3">
+                                <div className="flex justify-between text-gray-600 text-sm">
                                     <span>Subtotal</span>
-                                    <span className="font-medium">{order.total}</span>
+                                    <span className="font-medium text-gray-900">{order.total}</span>
                                 </div>
-                                <div className="flex justify-between text-gray-600 text-lg">
+                                <div className="flex justify-between text-gray-600 text-sm">
                                     <span>Tax (0%)</span>
-                                    <span className="font-medium">₦0.00</span>
+                                    <span className="font-medium text-gray-900">₦0.00</span>
                                 </div>
-                                <div className="flex justify-between text-gray-600 text-lg">
+                                <div className="flex justify-between text-gray-600 text-sm">
                                     <span>Shipping</span>
                                     <span className="text-green-600 font-medium">Free</span>
                                 </div>
-                                <div className="border-t-2 border-gray-900 pt-6 flex justify-between items-center">
-                                    <span className="text-xl font-bold text-gray-900">Total</span>
-                                    <span className="text-3xl font-extrabold text-gray-900">{order.total}</span>
+                                
+                                {/* Wallet Deduction */}
+                                {walletDed > 0 && (
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-green-600 font-medium">Wallet Payment</span>
+                                        <span className="text-green-600 font-bold">-₦{walletDed.toLocaleString()}</span>
+                                    </div>
+                                )}
+
+                                <div className="border-t-2 border-gray-900 pt-4 mt-4 flex justify-between items-center">
+                                    <span className="text-lg font-bold text-gray-900">Total Due</span>
+                                    <span className="text-2xl font-extrabold text-gray-900">₦{amountDue.toLocaleString()}</span>
                                 </div>
                             </div>
                         </div>
                         
-                        {/* Footer Notes */}
+                        {/* Footer Notes & Payment Link */}
                         <div className="mt-auto border-t border-gray-100 pt-10 text-center">
-                            <p className="text-sm text-gray-600 mb-2">
-                                Payment Method: <span className="font-bold text-gray-900 uppercase">{order.paymentMethod}</span>
-                            </p>
+                            
+                            {/* Payment Link Message */}
+                            <div className="mb-8 p-4 bg-red-50/50 rounded-xl border border-red-100 inline-block">
+                                <p className="text-sm text-gray-800 font-medium">
+                                    Click on <a href="#" className="text-red-600 underline font-bold hover:text-red-700 decoration-2 underline-offset-4">this link</a> to complete payment.
+                                </p>
+                            </div>
+
                             <p className="text-sm text-gray-400 italic">Thank you for shopping with Ogabassey!</p>
-                            <p className="text-xs text-gray-300 mt-8">Generated via Ogabassey Platform</p>
+                            <p className="text-[10px] text-gray-300 mt-8 uppercase tracking-widest">Generated via Ogabassey Platform</p>
                         </div>
                     </div>
                 </div>

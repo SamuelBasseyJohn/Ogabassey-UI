@@ -1,11 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
-import { Minus, Plus, Trash2, ArrowRight, HandCoins, Check, Calculator, ShieldCheck, ShoppingCart, ArrowLeft } from 'lucide-react';
+import { Minus, Plus, Trash2, ArrowRight, HandCoins, Check, Calculator, ShieldCheck, ShoppingCart, ArrowLeft, Info, Ticket, Gift, PenLine } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { AdUnit } from './AdUnit';
 import { NegotiationModal } from './NegotiationModal';
 import { EmptyState } from './EmptyState';
 import { CartItem } from '../types';
+import { GiftModal, GiftData } from './GiftModal';
 
 interface NegotiationState {
     isOpen: boolean;
@@ -18,6 +20,10 @@ interface NegotiationState {
 export const CartPage: React.FC = () => {
   const { cartItems, removeFromCart, updateQuantity, applyNegotiatedPrice, applyCartWideNegotiation, toggleAssurance, subtotal } = useCart();
   const [negotiationState, setNegotiationState] = useState<NegotiationState | null>(null);
+  const [voucherCode, setVoucherCode] = useState('');
+  const [isVoucherApplied, setIsVoucherApplied] = useState(false);
+  const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
+  const [giftData, setGiftData] = useState<GiftData | null>(null);
   const navigate = useNavigate();
 
   // Scroll to top on mount
@@ -59,6 +65,39 @@ export const CartPage: React.FC = () => {
           currentPrice: subtotal,
           name: "Entire Cart"
       });
+  };
+
+  const handleApplyVoucher = () => {
+      if (!voucherCode.trim()) return;
+      // Mock validation logic
+      setIsVoucherApplied(true);
+      // In a real app, this would validate against backend
+  };
+
+  const handleGiftToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.checked) {
+          setIsGiftModalOpen(true);
+      } else {
+          setGiftData(null);
+      }
+  };
+
+  const handleGiftSave = (data: GiftData) => {
+      setGiftData(data);
+      setIsGiftModalOpen(false);
+  };
+
+  const handleGiftModalClose = () => {
+      setIsGiftModalOpen(false);
+      // If closing without saving and no data exists, ensure the checkbox is unchecked visually by re-render
+      // (The checkbox checked state is derived from giftData !== null)
+  };
+
+  const totalWithExtras = subtotal + (giftData?.wrappingCost || 0);
+
+  const handleProceedToCheckout = () => {
+      // Pass gift wrapping cost as state if needed, or rely on context if you were to move gift state to context
+      navigate('/checkout', { state: { giftWrappingCost: giftData?.wrappingCost || 0 } });
   };
 
   return (
@@ -233,6 +272,48 @@ export const CartPage: React.FC = () => {
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
                         <h2 className="text-lg font-bold text-gray-900 mb-4">Order Summary</h2>
                         
+                        {/* Voucher Code Section */}
+                        <div className="mb-6">
+                            <label className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 block flex items-center gap-2">
+                                <Ticket size={14} className="text-red-600" />
+                                Voucher Code
+                            </label>
+                            <div className="flex gap-2">
+                                <input 
+                                    type="text" 
+                                    value={voucherCode}
+                                    onChange={(e) => setVoucherCode(e.target.value)}
+                                    placeholder="Enter code"
+                                    disabled={isVoucherApplied}
+                                    className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-500 transition-all disabled:opacity-70 disabled:bg-gray-100"
+                                />
+                                {isVoucherApplied ? (
+                                    <button 
+                                        onClick={() => { setIsVoucherApplied(false); setVoucherCode(''); }}
+                                        className="bg-gray-100 text-gray-600 hover:text-red-600 text-sm font-bold px-4 rounded-xl hover:bg-gray-200 transition-colors"
+                                    >
+                                        Remove
+                                    </button>
+                                ) : (
+                                    <button 
+                                        onClick={handleApplyVoucher}
+                                        className="bg-gray-900 text-white text-sm font-bold px-4 rounded-xl hover:bg-black transition-colors"
+                                    >
+                                        Apply
+                                    </button>
+                                )}
+                            </div>
+                            <div className="flex items-start gap-2 mt-3 text-xs text-blue-700 bg-blue-50 p-3 rounded-xl border border-blue-100">
+                                <Info size={16} className="shrink-0 mt-0.5 text-blue-600" />
+                                <span className="font-medium leading-relaxed">Get a FREE accessory when you use a friend’s voucher</span>
+                            </div>
+                            {isVoucherApplied && (
+                                <div className="flex items-center gap-2 mt-2 text-xs text-green-600 font-bold animate-in fade-in slide-in-from-top-1">
+                                    <Check size={14} /> Voucher applied successfully!
+                                </div>
+                            )}
+                        </div>
+
                         <div className="space-y-3 mb-6">
                             <div className="flex justify-between text-gray-600 text-sm">
                                 <span>Subtotal</span>
@@ -242,11 +323,62 @@ export const CartPage: React.FC = () => {
                                 <span>Shipping</span>
                                 <span className="text-green-600 font-medium">Free</span>
                             </div>
+                            {giftData?.wrappingCost > 0 && (
+                                <div className="flex justify-between text-gray-600 text-sm animate-in fade-in">
+                                    <span>Gift Wrapping</span>
+                                    <span>₦{giftData.wrappingCost.toLocaleString()}</span>
+                                </div>
+                            )}
                             <div className="border-t border-dashed border-gray-200 my-2"></div>
                             <div className="flex justify-between text-gray-900 font-bold text-lg">
                                 <span>Total</span>
-                                <span>₦{subtotal.toLocaleString()}</span>
+                                <span>₦{totalWithExtras.toLocaleString()}</span>
                             </div>
+                        </div>
+
+                        {/* Gift Option - Updated */}
+                        <div className="mb-6 bg-pink-50 p-4 rounded-xl border border-pink-100">
+                            <div className="flex items-center justify-between">
+                                <label className="flex items-center gap-2 cursor-pointer select-none">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={giftData !== null}
+                                        onChange={handleGiftToggle}
+                                        className="w-4 h-4 text-red-600 rounded focus:ring-red-500 border-gray-300"
+                                    />
+                                    <span className="font-bold text-gray-900 text-sm flex items-center gap-2">
+                                        <Gift size={16} className="text-red-600" />
+                                        Gift this order
+                                    </span>
+                                </label>
+                                {giftData && (
+                                    <button 
+                                        onClick={() => setIsGiftModalOpen(true)} 
+                                        className="text-xs font-bold text-red-600 bg-white border border-red-100 px-3 py-1 rounded-lg hover:bg-red-50 transition-colors"
+                                    >
+                                        Edit
+                                    </button>
+                                )}
+                            </div>
+                            
+                            {giftData && (
+                                <div className="mt-3 animate-in fade-in slide-in-from-top-2 text-xs text-gray-600 bg-white/50 p-3 rounded-lg border border-pink-100/50 space-y-1">
+                                    <p className="flex justify-between">
+                                        <span className="font-bold text-gray-800">Items:</span> 
+                                        <span>
+                                            {giftData.selectedItemIds.length === cartItems.length 
+                                                ? "(All items)" 
+                                                : `(${giftData.selectedItemIds.length} items selected)`}
+                                        </span>
+                                    </p>
+                                    <p><span className="font-bold text-gray-800">For:</span> {giftData.recipientName}</p>
+                                    <p><span className="font-bold text-gray-800">Address:</span> {giftData.address}</p>
+                                    <p><span className="font-bold text-gray-800">From:</span> {giftData.senderType === 'anonymous' ? 'Anonymous' : (giftData.senderName || 'You')}</p>
+                                    <p className="pt-1 text-pink-600 font-medium">
+                                        {giftData.wrapping === 'standard' ? 'Standard Wrapping (₦10,000)' : 'Custom Wrap'}
+                                    </p>
+                                </div>
+                            )}
                         </div>
 
                         <div className="space-y-3">
@@ -258,7 +390,10 @@ export const CartPage: React.FC = () => {
                                 Negotiate Total
                             </button>
 
-                            <button className="w-full bg-red-600 md:hover:bg-red-700 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg md:hover:shadow-red-200 group active:scale-[0.98] active:shadow-none">
+                            <button 
+                                onClick={handleProceedToCheckout}
+                                className="w-full bg-red-600 md:hover:bg-red-700 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg md:hover:shadow-red-200 group active:scale-[0.98] active:shadow-none"
+                            >
                                 Proceed to Checkout
                                 <ArrowRight size={20} className="md:group-hover:translate-x-1 transition-transform" />
                             </button>
@@ -286,6 +421,14 @@ export const CartPage: React.FC = () => {
           onSuccess={handleNegotiationSuccess}
         />
       )}
+
+      {/* Gift Personalization Modal */}
+      <GiftModal 
+        isOpen={isGiftModalOpen}
+        onClose={handleGiftModalClose}
+        onSave={handleGiftSave}
+        cartItems={cartItems}
+      />
     </div>
   );
 };

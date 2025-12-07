@@ -121,8 +121,8 @@ export const PrivacyPolicyPage: React.FC = () => {
               If you have any questions about this Privacy Policy, the practices of this site, or your dealings with this site, please contact us at:
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-                <a href="mailto:support@ogabassey.com" className="text-red-600 font-bold hover:underline">
-                    support@ogabassey.com
+                <a href="mailto:privacy@ogabassey.com" className="text-red-600 font-bold hover:underline">
+                    privacy@ogabassey.com
                 </a>
                 <span className="hidden sm:inline text-gray-300">|</span>
                 <span className="text-gray-700 font-medium">

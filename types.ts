@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export interface ProductRecommendation {
@@ -25,7 +26,7 @@ export interface Banner {
 }
 
 export interface Product {
-  id: number | string;
+  id: number;
   name: string;
   price: string;
   rawPrice: number;
@@ -33,7 +34,7 @@ export interface Product {
   description: string;
   rating: number;
   category: string;
-  condition: 'New' | 'Used' | 'Open Box';
+  condition: 'New' | 'Used';
   // Detailed specs for filtering
   brand?: string;
   storage?: string;
@@ -42,10 +43,6 @@ export interface Product {
   simType?: string;
   displayType?: string;
   displaySize?: string;
-  // New fields for Interactive Grid
-  images?: string[]; 
-  spec?: string;
-  reviews?: number;
 }
 
 export interface CartItem extends Product {
@@ -59,4 +56,16 @@ export interface CartItem extends Product {
   negotiatedPrice?: number;
   negotiationStatus?: 'none' | 'accepted';
   hasAssurance?: boolean;
+}
+
+export interface Order {
+  id: string;
+  date: string;
+  time: string;
+  total: string;
+  status: string;
+  paymentMethod: string;
+  shippingAddress: string;
+  items: CartItem[];
+  walletDeduction?: number;
 }

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { CartItem, Product } from '../types';
 
@@ -11,6 +12,7 @@ interface CartContextType {
   applyNegotiatedPrice: (cartItemId: string, newPrice: number) => void;
   applyCartWideNegotiation: (newTotal: number) => void;
   toggleAssurance: (cartItemId: string) => void;
+  clearCart: () => void;
   totalItems: number;
   subtotal: number;
   // Upsell State
@@ -139,6 +141,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }));
   };
 
+  const clearCart = () => {
+      setCartItems([]);
+  };
+
   const dismissUpsell = () => {
       setShowUpsell(false);
   };
@@ -154,6 +160,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       applyNegotiatedPrice,
       applyCartWideNegotiation,
       toggleAssurance,
+      clearCart,
       totalItems,
       subtotal,
       lastAddedProduct,

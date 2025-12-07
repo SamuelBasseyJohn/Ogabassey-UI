@@ -1,11 +1,13 @@
+
 import React, { useState } from 'react';
 import { Package, Truck, CheckCircle2, Clock, ChevronRight, XCircle, Search, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { orders } from '../data/orders';
+import { useOrder } from '../contexts/OrderContext';
 import { EmptyState } from './EmptyState';
 
 export const OrdersPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const { orders } = useOrder();
   const navigate = useNavigate();
 
   // Filter Logic
@@ -129,12 +131,8 @@ export const OrdersPage: React.FC = () => {
                                         <div className="flex-1 min-w-0">
                                             <h4 className="font-bold text-sm text-gray-900 line-clamp-1 group-hover/item:text-red-600 transition-colors">{item.name}</h4>
                                             <p className="text-xs text-gray-500 line-clamp-1">{item.description}</p>
+                                            <p className="text-[10px] text-gray-400 mt-1">Qty: {item.quantity}</p>
                                         </div>
-                                        {order.items.length === 1 && (
-                                            <button className="text-xs font-bold text-red-600 hover:text-red-700 whitespace-nowrap hidden sm:block bg-red-50 px-3 py-1.5 rounded-lg transition-colors">
-                                                Buy Again
-                                            </button>
-                                        )}
                                     </Link>
                                 ))}
                             </div>

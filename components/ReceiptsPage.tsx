@@ -1,70 +1,69 @@
 
 import React, { useState } from 'react';
-import { FileText, Download, Search, CheckCircle2, ChevronRight, CreditCard, ExternalLink, X, AlertCircle, Clock, Leaf } from 'lucide-react';
-import { products } from '../data/products';
+import { FileText, Download, Search, CheckCircle2, ChevronRight, CreditCard, ExternalLink, X, AlertCircle, Clock } from 'lucide-react';
 import { ReceiptModal, ReceiptData } from './ReceiptModal';
 import { EmptyState } from './EmptyState';
+import { useOrder } from '../contexts/OrderContext';
 
 export const ReceiptsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedReceipt, setSelectedReceipt] = useState<ReceiptData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { orders } = useOrder();
 
-  // Mock receipts showcasing the 3 requested versions
-  const receipts: ReceiptData[] = [
-      { 
-        id: "OG-2024-001", 
-        date: "May 20, 2024", 
-        time: "10:23 AM",
-        total: "₦601,200", 
-        items: 1, 
-        product: products[0],
-        status: "Unpaid",
-        method: "Bank Transfer",
-        customerName: "Peter Simon",
-        address: "123 Mockingbird Lane, Anytown",
-        imei: "3728402723017639",
-        paymentStatus: 'unpaid',
-        balance: "₦601,200"
-      },
-      { 
-        id: "OG-2024-002", 
-        date: "May 20, 2024", 
-        time: "1:45 PM",
-        total: "₦601,200", 
-        items: 1, 
-        product: products[0],
-        status: "Partially Paid",
-        method: "Card",
-        customerName: "Peter Simon",
-        address: "123 Mockingbird Lane, Anytown",
-        imei: "3728402723017639",
-        paymentStatus: 'partially_paid',
-        amountPaid: "₦301,200",
-        balance: "₦300,000"
-      },
-      { 
-        id: "OG-2024-003", 
-        date: "May 20, 2024", 
-        time: "06:12 PM",
-        total: "₦641,200", 
-        items: 1, 
-        product: products[0],
-        status: "Paid",
-        method: "Wallet",
-        customerName: "Peter Simon",
-        address: "123 Mockingbird Lane, Anytown",
-        imei: "3728402723017639",
-        paymentStatus: 'paid'
-      },
-  ];
+  // Transform Orders to Receipts
+  const receipts: ReceiptData[] = orders.map(order => {
+      let paymentStatus: 'unpaid' | 'partially_paid' | 'paid' = 'paid';
+      let statusText = 'Paid';
+      let balance = '₦0';
+      let amountPaid = order.total; // Default to full
+
+      // Parse total string to number for calculations
+      const totalVal = parseFloat(order.total.replace(/[^0-9.]/g, ''));
+      const walletDed = order.walletDeduction || 0;
+
+      // Logic:
+      // 1. If method is Invoice (Bank Transfer Pending), it's Unpaid.
+      // 2. If Invoice + Wallet used, it's Partially Paid.
+      // 3. Otherwise (Card, Paystack, Wallet only), it's Paid.
+      
+      if (order.paymentMethod === 'Bank Transfer (Pending)') {
+          if (walletDed > 0) {
+              paymentStatus = 'partially_paid';
+              statusText = 'Partially Paid';
+              amountPaid = `₦${walletDed.toLocaleString()}`;
+              balance = `₦${(totalVal - walletDed).toLocaleString()}`;
+          } else {
+              paymentStatus = 'unpaid';
+              statusText = 'Unpaid';
+              amountPaid = '₦0';
+              balance = order.total;
+          }
+      }
+
+      return {
+          id: order.id,
+          date: order.date,
+          time: order.time,
+          total: order.total,
+          items: order.items.reduce((acc, item) => acc + item.quantity, 0),
+          products: order.items,
+          status: statusText,
+          method: order.walletDeduction && order.walletDeduction > 0 ? `Wallet + ${order.paymentMethod}` : order.paymentMethod,
+          customerName: "Alex Doe", // Mock user name
+          address: order.shippingAddress,
+          paymentStatus: paymentStatus,
+          amountPaid: amountPaid,
+          balance: balance
+      };
+  });
 
   // Search Logic
   const filteredReceipts = receipts.filter(receipt => {
       const query = searchQuery.toLowerCase();
       return (
           receipt.id.toLowerCase().includes(query) ||
-          receipt.product.name.toLowerCase().includes(query) ||
+          receipt.products.some(p => p.name.toLowerCase().includes(query)) ||
           receipt.status.toLowerCase().includes(query)
       );
   });
@@ -86,7 +85,7 @@ export const ReceiptsPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 pb-24 md:pb-12 pt-4 md:pt-8 flex flex-col">
       <div className="max-w-[1400px] mx-auto px-4 md:px-6 w-full flex-1 flex flex-col">
         
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                 <FileText className="text-red-600 fill-red-600" />
                 Receipts & Invoices
@@ -112,17 +111,6 @@ export const ReceiptsPage: React.FC = () => {
             </div>
         </div>
 
-        {/* Sustainability Banner */}
-        <div className="bg-green-50 border border-green-100 rounded-xl p-4 mb-8 flex items-center gap-3">
-            <div className="p-2 bg-white text-green-600 rounded-lg shrink-0 border border-green-100">
-                <Leaf size={18} />
-            </div>
-            <div>
-                <p className="text-xs font-bold text-green-800 uppercase tracking-wide mb-0.5">100% Paperless</p>
-                <p className="text-sm text-green-700">By using digital receipts, you've helped us save over 100k sheets of paper this year.</p>
-            </div>
-        </div>
-
         {filteredReceipts.length === 0 ? (
             <div className="flex-1 flex items-center justify-center">
                 <EmptyState 
@@ -138,9 +126,9 @@ export const ReceiptsPage: React.FC = () => {
                     <div key={receipt.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group">
                         <div className="p-5 md:p-6 flex flex-col md:flex-row gap-6 md:items-center">
                             
-                            {/* Product Image */}
+                            {/* Product Image (First item) */}
                             <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-50 rounded-xl p-2 shrink-0 border border-gray-100 flex items-center justify-center">
-                                <img src={receipt.product.image} alt={receipt.product.name} className="w-full h-full object-contain mix-blend-multiply" />
+                                <img src={receipt.products[0].image} alt={receipt.products[0].name} className="w-full h-full object-contain mix-blend-multiply" />
                             </div>
 
                             {/* Info Grid */}
@@ -154,7 +142,10 @@ export const ReceiptsPage: React.FC = () => {
                                         <span className="text-xs text-gray-500 font-medium">{receipt.date}</span>
                                     </div>
                                     <h3 className="font-bold text-gray-900 text-sm md:text-base mb-0.5">#{receipt.id}</h3>
-                                    <p className="text-xs text-gray-500 truncate">{receipt.product.name}</p>
+                                    <p className="text-xs text-gray-500 truncate">
+                                        {receipt.products[0].name}
+                                        {receipt.products.length > 1 && ` +${receipt.products.length - 1} others`}
+                                    </p>
                                 </div>
 
                                 {/* Column 2: Payment */}

@@ -1,46 +1,28 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { History, ShoppingCart, Calendar, ArrowRight, ExternalLink } from 'lucide-react';
-import { products } from '../data/products';
 import { useCart } from '../contexts/CartContext';
+import { useOrder } from '../contexts/OrderContext';
 import { useNavigate } from 'react-router-dom';
 import { EmptyState } from './EmptyState';
 
 export const PurchaseHistoryPage: React.FC = () => {
   const { addToCart } = useCart();
+  const { orders } = useOrder();
   const navigate = useNavigate();
 
-  // Mock Purchase History Data (Flat list of items)
-  const purchasedItems = [
-    {
-      purchaseId: "PUR-9921",
-      date: "Jan 15, 2024",
-      product: products[0],
-      price: products[0].price,
-      quantity: 1
-    },
-    {
-      purchaseId: "PUR-9921",
-      date: "Jan 15, 2024",
-      product: products[4],
-      price: products[4].price,
-      quantity: 1
-    },
-    {
-      purchaseId: "PUR-8810",
-      date: "Dec 10, 2023",
-      product: products[2],
-      price: products[2].price,
-      quantity: 1
-    },
-    {
-      purchaseId: "PUR-7723",
-      date: "Nov 05, 2023",
-      product: products[6],
-      price: products[6].price,
-      quantity: 2
-    }
-  ];
+  // Flatten orders to get a list of purchased items
+  const purchasedItems = useMemo(() => {
+      return orders.flatMap(order => 
+          order.items.map(item => ({
+              purchaseId: order.id,
+              date: order.date,
+              product: item,
+              price: item.negotiatedPrice ? `₦${item.negotiatedPrice.toLocaleString()}` : item.price,
+              quantity: item.quantity
+          }))
+      );
+  }, [orders]);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24 md:pb-12 pt-4 md:pt-8 flex flex-col">
@@ -65,7 +47,7 @@ export const PurchaseHistoryPage: React.FC = () => {
             <div className="space-y-4">
                 {purchasedItems.map((item, idx) => (
                     <div 
-                        key={idx} 
+                        key={`${item.purchaseId}-${idx}`} 
                         className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6 flex flex-col md:flex-row gap-6 items-start md:items-center shadow-sm hover:shadow-md transition-shadow"
                     >
                         {/* Image */}
@@ -80,7 +62,7 @@ export const PurchaseHistoryPage: React.FC = () => {
                                 <span>Purchased on {item.date}</span>
                             </div>
                             <h3 className="font-bold text-gray-900 text-sm md:text-base mb-1 truncate">{item.product.name}</h3>
-                            <p className="text-sm font-bold text-red-600">{item.price}</p>
+                            <p className="text-sm font-bold text-red-600">{item.price} <span className="text-gray-400 font-normal text-xs ml-1">x {item.quantity}</span></p>
                         </div>
 
                         {/* Actions */}
@@ -94,7 +76,10 @@ export const PurchaseHistoryPage: React.FC = () => {
                             >
                                 <ShoppingCart size={14} /> Buy Again
                             </button>
-                            <button className="p-2.5 border border-gray-200 rounded-xl text-gray-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-colors">
+                            <button 
+                                onClick={() => navigate(`/product/${item.product.id}`)}
+                                className="p-2.5 border border-gray-200 rounded-xl text-gray-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-colors"
+                            >
                                 <ExternalLink size={16} />
                             </button>
                         </div>

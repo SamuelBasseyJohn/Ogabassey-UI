@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Instagram, Twitter, Facebook, Linkedin, Youtube, Music, MapPin, Phone, Mail, Apple } from 'lucide-react';
+import { Instagram, Twitter, Facebook, Linkedin, Youtube, Music, MapPin, Phone, Mail, Apple, Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Logo } from './Logo';
 
@@ -45,7 +45,6 @@ export const Footer: React.FC = () => {
                     <li><a href="#" className="hover:text-red-500">Careers</a></li>
                     <li><Link to="/blog" className="hover:text-red-500">Blog</Link></li>
                     <li><Link to="/privacy" className="hover:text-red-500">Privacy Policy</Link></li>
-                    <li><Link to="/legal" className="hover:text-red-500">Legal & Disputes</Link></li>
                     <li><Link to="/sustainability" className="hover:text-red-500">Sustainability</Link></li>
                 </ul>
             </div>
@@ -74,7 +73,7 @@ export const Footer: React.FC = () => {
                </li>
                <li className="flex items-center gap-2">
                  <Mail className="shrink-0 text-red-600" size={16} />
-                 <a href="mailto:support@ogabassey.com" className="hover:text-white transition-colors">support@ogabassey.com</a>
+                 <span>help@ogabassey.com</span>
                </li>
              </ul>
           </div>
@@ -83,31 +82,26 @@ export const Footer: React.FC = () => {
           <div>
             <h3 className="text-sm font-bold mb-4 text-white uppercase tracking-wider">Download App</h3>
             <div className="flex gap-2 mb-6">
-              <button className="flex items-center gap-2 bg-black border border-gray-700 rounded-lg px-3 py-1.5 hover:bg-gray-900 transition-colors group">
-                <Apple size={22} className="text-white fill-current" />
+              <button className="flex items-center gap-1.5 bg-gray-900 border border-gray-700 rounded px-2 py-1.5 hover:border-gray-500 transition-colors">
+                <Apple size={16} className="text-white" />
                 <div className="text-left leading-none">
-                  <div className="text-[9px] text-gray-400 font-medium group-hover:text-gray-300">Download on the</div>
-                  <div className="text-[13px] font-bold text-white tracking-wide">App Store</div>
+                  <div className="text-[8px] text-gray-400">Download on</div>
+                  <div className="text-[10px] font-bold text-white">App Store</div>
                 </div>
               </button>
-              <button className="flex items-center gap-2 bg-black border border-gray-700 rounded-lg px-3 py-1.5 hover:bg-gray-900 transition-colors group">
-                <svg viewBox="0 0 24 24" className="w-5 h-5">
-                    <path fill="#4285F4" d="M23.64 12.48l-2.95-3.07L16.2 13.9l4.49 4.49c.87-.93 1.35-2.22.95-3.55zM.65 1.57C.24 2.21 0 3.06 0 4.13v15.74c0 1.07.24 1.92.65 2.56l.06.05L13.1 10.09v-.19L.71 1.52l-.06.05z"/>
-                    <path fill="#34A853" d="M14.39 12.1L2.09 24.4c.39.11.83.07 1.19-.13l16.29-9.28-5.18-5.18v2.29z"/>
-                    <path fill="#EA4335" d="M2.09-.4c-.36-.2-.8-.24-1.19-.13L14.39 11.9l5.18-5.18L3.28-.53c-.39-.2-.79-.2-1.19.13z"/>
-                    <path fill="#FBBC05" d="M.65 1.57C.24 2.21 0 3.06 0 4.13v15.74c0 1.07.24 1.92.65 2.56l.06.05L13.1 10.09v-.19L.71 1.52l-.06.05z"/>
-                </svg>
+              <button className="flex items-center gap-1.5 bg-gray-900 border border-gray-700 rounded px-2 py-1.5 hover:border-gray-500 transition-colors">
+                <Play size={16} className="text-white fill-current" />
                 <div className="text-left leading-none">
-                  <div className="text-[9px] text-gray-400 font-medium group-hover:text-gray-300 uppercase">Get it on</div>
-                  <div className="text-[13px] font-bold text-white tracking-wide">Google Play</div>
+                  <div className="text-[8px] text-gray-400">Get it on</div>
+                  <div className="text-[10px] font-bold text-white">Google Play</div>
                 </div>
               </button>
             </div>
             
             <div className="flex items-center gap-3 opacity-70 grayscale hover:grayscale-0 transition-all">
                <span className="text-xs font-bold text-white">Secured by:</span>
-               <div className="h-4 w-auto bg-white/20 rounded px-1 flex items-center justify-center text-[8px] font-bold text-white tracking-tighter px-2">PAYSTACK</div>
-               <div className="h-4 w-auto bg-white/20 rounded px-1 flex items-center justify-center text-[8px] font-bold text-white tracking-tighter px-2">FLUTTERWAVE</div>
+               <div className="h-4 w-auto bg-white/20 rounded px-1"></div>
+               <div className="h-4 w-auto bg-white/20 rounded px-1"></div>
             </div>
           </div>
 

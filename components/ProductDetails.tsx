@@ -37,10 +37,6 @@ const FALLBACK_PRODUCT = {
     { name: 'Black Titanium', value: '#1a1a1a' }
   ],
   storage: ['256GB', '512GB', '1TB'],
-  ram: '8GB',
-  simType: 'Dual eSIM',
-  displayType: 'OLED',
-  displaySize: '6.7"',
   specs: [
     { label: 'Screen Size', value: '6.7 inches' },
     { label: 'Processor', value: 'A17 Pro chip' },
@@ -58,7 +54,11 @@ const FALLBACK_PRODUCT = {
     }
   ],
   category: 'Phones',
-  condition: 'New'
+  condition: 'New',
+  ram: '8GB',
+  simType: 'Dual eSIM',
+  displayType: 'OLED',
+  displaySize: '6.7"'
 };
 
 // Mock Reviews

@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { X, Download, Printer, Share2, Copy, AlertCircle, CheckCircle2, Leaf } from 'lucide-react';
+import { X, Download, Printer, Share2, Copy, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Logo } from './Logo';
-import { Product } from '../types';
+import { Product, CartItem } from '../types';
 
 export interface ReceiptData {
   id: string;
@@ -10,7 +10,7 @@ export interface ReceiptData {
   time: string;
   total: string;
   items: number;
-  product: Product;
+  products: CartItem[]; // Changed from Product to CartItem array
   status: string; // Display status text
   method: string;
   
@@ -24,8 +24,6 @@ export interface ReceiptData {
   address?: string;
   imei?: string;
   serial?: string;
-  color?: string;
-  storage?: string;
 }
 
 interface ReceiptModalProps {
@@ -64,7 +62,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, dat
       <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl relative z-10 flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
         
         {/* Header Actions */}
-        <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50/50 rounded-t-2xl">
+        <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50/50 rounded-t-2xl shrink-0">
            <h3 className="font-bold text-gray-900">{documentTitle} Details</h3>
            <div className="flex items-center gap-2">
               <button className="p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors" title="Print">
@@ -115,7 +113,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, dat
                  <div>
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Billed To</p>
                     <p className="font-bold text-gray-900">{data.customerName || 'Alex Doe'}</p>
-                    <p className="text-gray-500 text-xs mt-1 leading-relaxed">{data.address || '2 Olaide Tomori St, Ikeja, Lagos'}</p>
+                    <p className="text-gray-600 text-xs mt-1 leading-relaxed">{data.address || '2 Olaide Tomori St, Ikeja, Lagos'}</p>
                  </div>
                  <div className="text-right">
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Payment Method</p>
@@ -129,28 +127,31 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, dat
               {/* Line Items */}
               <div className="mb-8 relative z-10">
                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Product Details</p>
-                 <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
-                    <div className="flex justify-between items-start mb-2">
-                       <div>
-                          <p className="font-bold text-sm text-gray-900">{data.product.name}</p>
-                          <p className="text-xs text-gray-500">Qty: {data.items}</p>
-                       </div>
-                       <p className="font-bold text-sm text-gray-900">{data.product.price}</p>
-                    </div>
-                    {/* Customizable Feeds */}
-                    <div className="mt-3 pt-3 border-t border-gray-200 flex flex-wrap gap-x-6 gap-y-2">
-                        {data.imei && (
-                            <div className="text-xs flex items-center gap-1 group cursor-pointer">
-                                <span className="text-gray-400">IMEI:</span> 
-                                <span className="text-gray-900 font-mono font-medium">{data.imei}</span>
+                 <div className="space-y-3">
+                    {data.products.map((item, index) => (
+                        <div key={index} className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                            <div className="flex justify-between items-start mb-2">
+                                <div>
+                                    <p className="font-bold text-sm text-gray-900 line-clamp-1">{item.name}</p>
+                                    <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                                </div>
+                                <p className="font-bold text-sm text-gray-900">{item.price}</p>
                             </div>
-                        )}
-                         {data.color && (
-                            <div className="text-xs">
-                                <span className="text-gray-400">Color:</span> <span className="text-gray-700 font-medium">{data.color}</span>
+                            {/* Customizable Feeds */}
+                            <div className="mt-2 pt-2 border-t border-gray-200 flex flex-wrap gap-x-6 gap-y-2">
+                                {(item.selectedColor) && (
+                                    <div className="text-xs">
+                                        <span className="text-gray-400">Color:</span> <span className="text-gray-700 font-medium">{item.selectedColor}</span>
+                                    </div>
+                                )}
+                                {(item.selectedStorage) && (
+                                    <div className="text-xs">
+                                        <span className="text-gray-400">Storage:</span> <span className="text-gray-700 font-medium">{item.selectedStorage}</span>
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    ))}
                  </div>
               </div>
 
@@ -182,12 +183,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, dat
               {/* Footer */}
               <div className="text-center relative z-10">
                  <p className="text-[10px] text-gray-400 mb-2">Questions regarding this {documentTitle.toLowerCase()}?</p>
-                 <p className="text-xs font-bold text-red-600">support@ogabassey.com • +234 814 697 8921</p>
-                 
-                 <div className="mt-4 flex items-center justify-center gap-2 text-[10px] text-green-600 font-medium bg-green-50 py-1.5 rounded-lg border border-green-100">
-                    <Leaf size={10} /> 
-                    <span>Paperless Transaction - Thank you for saving trees!</span>
-                 </div>
+                 <p className="text-xs font-bold text-red-600">help@ogabassey.com • +234 814 697 8921</p>
               </div>
            </div>
         </div>

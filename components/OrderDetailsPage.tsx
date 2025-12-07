@@ -2,26 +2,29 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Package, MapPin, CreditCard, Download, Truck, CheckCircle2, Clock, XCircle, ShoppingBag, ArrowRight } from 'lucide-react';
-import { orders } from '../data/orders';
+import { useOrder } from '../contexts/OrderContext';
 import { EmptyState } from './EmptyState';
 import { InvoiceModal, InvoiceOrderData } from './InvoiceModal';
 import { useCart } from '../contexts/CartContext';
+import { Order } from '../types';
 
 export const OrderDetailsPage: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const [order, setOrder] = useState<typeof orders[0] | null>(null);
+  const { getOrderById } = useOrder();
+  const [order, setOrder] = useState<Order | null>(null);
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
 
   useEffect(() => {
-    // Find order by ID
-    const foundOrder = orders.find(o => o.id === orderId);
-    if (foundOrder) {
-        setOrder(foundOrder);
+    if (orderId) {
+        const foundOrder = getOrderById(orderId);
+        if (foundOrder) {
+            setOrder(foundOrder);
+        }
     }
     window.scrollTo(0,0);
-  }, [orderId]);
+  }, [orderId, getOrderById]);
 
   if (!order) {
       return (
@@ -126,7 +129,7 @@ export const OrderDetailsPage: React.FC = () => {
                                     <p className="text-xs text-gray-500 mb-2">{item.description}</p>
                                     <div className="flex items-center justify-between">
                                         <span className="text-sm font-bold text-gray-900">{item.price}</span>
-                                        <span className="text-xs text-gray-500">Qty: 1</span>
+                                        <span className="text-xs text-gray-500">Qty: {item.quantity}</span>
                                     </div>
                                 </div>
                             </div>

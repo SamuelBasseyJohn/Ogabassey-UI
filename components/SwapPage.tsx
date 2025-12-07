@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { RefreshCw, ArrowRight, Smartphone, Check, DollarSign, Leaf, Recycle } from 'lucide-react';
+import { RefreshCw, ArrowRight, Smartphone, Check, DollarSign } from 'lucide-react';
 
 export const SwapPage: React.FC = () => {
   return (
@@ -64,7 +64,7 @@ export const SwapPage: React.FC = () => {
         </div>
 
         {/* Eligible Devices */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 mb-10">
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
             <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-lg text-gray-900">What can you trade in?</h3>
             </div>
@@ -77,22 +77,6 @@ export const SwapPage: React.FC = () => {
                         <span className="text-sm font-medium text-gray-700">{item}</span>
                     </div>
                 ))}
-            </div>
-        </div>
-
-        {/* Sustainability Impact */}
-        <div className="bg-green-50 rounded-2xl p-6 md:p-8 border border-green-100 flex flex-col md:flex-row items-center gap-6 text-center md:text-left shadow-sm">
-            <div className="w-16 h-16 bg-white text-green-600 rounded-full flex items-center justify-center shadow-sm shrink-0 border border-green-100">
-                <Leaf size={32} />
-            </div>
-            <div className="flex-1">
-                <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                    <Recycle size={20} className="text-green-600" />
-                    <h3 className="font-bold text-green-900 text-lg">Trade-in is Recycling</h3>
-                </div>
-                <p className="text-green-800 text-sm leading-relaxed max-w-2xl">
-                    By swapping your device, you keep e-waste out of landfills. We refurbish and re-home your old gadgets, extending their lifecycle and reducing the carbon footprint of manufacturing new ones. <span className="font-bold">It's a win for your wallet and the planet.</span>
-                </p>
             </div>
         </div>
 

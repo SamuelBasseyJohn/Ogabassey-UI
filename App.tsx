@@ -8,6 +8,8 @@ import { CategoryPage } from './components/CategoryPage';
 import { SavedPage } from './components/SavedPage';
 import { Footer } from './components/Footer';
 import { CartPage } from './components/CartPage';
+import { CheckoutPage } from './components/CheckoutPage';
+import { OrderSuccessPage } from './components/OrderSuccessPage';
 import { WalletPage } from './components/WalletPage';
 import { ProfilePage } from './components/ProfilePage';
 import { ReviewsPage } from './components/ReviewsPage';
@@ -27,12 +29,14 @@ import { AboutUsPage } from './components/AboutUsPage';
 import { PrivacyPolicyPage } from './components/PrivacyPolicyPage';
 import { SustainabilityPage } from './components/SustainabilityPage';
 import { BlogPage } from './components/BlogPage';
-import { LegalDisputePage } from './components/LegalDisputePage';
 import { CartProvider } from './contexts/CartContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { SavedProvider } from './contexts/SavedContext';
 import { ComparisonProvider } from './contexts/ComparisonContext';
+import { ChatProvider } from './contexts/ChatContext';
+import { WalletProvider } from './contexts/WalletContext';
+import { OrderProvider } from './contexts/OrderContext';
 import { AdUnit } from './components/AdUnit';
 import { ChatWidget } from './components/ChatWidget';
 import { MobileFooter } from './components/MobileFooter';
@@ -61,6 +65,8 @@ const AppContent: React.FC = () => {
             <Route path="/product/:id" element={<ProductDetails />} />
             <Route path="/saved" element={<SavedPage />} />
             <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/order-success" element={<OrderSuccessPage />} />
             <Route path="/wallet" element={<WalletPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/reviews" element={<ReviewsPage />} />
@@ -78,7 +84,6 @@ const AppContent: React.FC = () => {
             <Route path="/help" element={<HelpSupportPage />} />
             <Route path="/about" element={<AboutUsPage />} />
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
-            <Route path="/legal" element={<LegalDisputePage />} />
             <Route path="/sustainability" element={<SustainabilityPage />} />
             <Route path="/blog" element={<BlogPage />} />
           </Routes>
@@ -131,9 +136,15 @@ const App: React.FC = () => {
         <CartProvider>
           <SavedProvider>
             <ComparisonProvider>
-                <HashRouter>
-                <AppContent />
-                </HashRouter>
+              <ChatProvider>
+                <WalletProvider>
+                  <OrderProvider>
+                    <HashRouter>
+                    <AppContent />
+                    </HashRouter>
+                  </OrderProvider>
+                </WalletProvider>
+              </ChatProvider>
             </ComparisonProvider>
           </SavedProvider>
         </CartProvider>
