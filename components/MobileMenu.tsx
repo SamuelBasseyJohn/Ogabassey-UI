@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { X, User, Heart, Wallet, ShoppingBag, HelpCircle, Star, Crown, FileText, MapPin, Wrench, RefreshCw, Palette, Snowflake, ScanBarcode } from 'lucide-react';
+import { X, User, Heart, Wallet, ShoppingBag, HelpCircle, Star, Crown, FileText, MapPin, Wrench, RefreshCw, Palette, Snowflake, ScanBarcode, BookOpen } from 'lucide-react';
 import { Logo } from './Logo';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -33,6 +33,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
      { label: 'Address Book', icon: MapPin, path: '/addresses' },
      { label: 'Repairs', icon: Wrench, path: '/repairs' },
      { label: 'Swap / Trade-in', icon: RefreshCw, path: '/swap' },
+     { label: 'Blog & News', icon: BookOpen, path: '/blog' },
      { label: 'My Reviews', icon: Star, path: '/reviews' },
      { label: 'Help & Support', icon: HelpCircle, path: '/help' },
   ];

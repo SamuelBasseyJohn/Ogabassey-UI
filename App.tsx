@@ -29,6 +29,8 @@ import { AboutUsPage } from './components/AboutUsPage';
 import { PrivacyPolicyPage } from './components/PrivacyPolicyPage';
 import { SustainabilityPage } from './components/SustainabilityPage';
 import { BlogPage } from './components/BlogPage';
+import { WarrantyPolicyPage } from './components/WarrantyPolicyPage';
+import { ReturnPolicyPage } from './components/ReturnPolicyPage';
 import { CartProvider } from './contexts/CartContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { NotificationProvider } from './contexts/NotificationContext';
@@ -86,6 +88,8 @@ const AppContent: React.FC = () => {
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
             <Route path="/sustainability" element={<SustainabilityPage />} />
             <Route path="/blog" element={<BlogPage />} />
+            <Route path="/warranty" element={<WarrantyPolicyPage />} />
+            <Route path="/return-policy" element={<ReturnPolicyPage />} />
           </Routes>
           
           <div className="max-w-[1400px] mx-auto px-4 md:px-6">

@@ -56,6 +56,7 @@ export interface CartItem extends Product {
   negotiatedPrice?: number;
   negotiationStatus?: 'none' | 'accepted';
   hasAssurance?: boolean;
+  imei?: string;
 }
 
 export interface Order {

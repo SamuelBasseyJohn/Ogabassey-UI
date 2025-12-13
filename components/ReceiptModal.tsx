@@ -1,8 +1,8 @@
 
-import React from 'react';
-import { X, Download, Printer, Share2, Copy, AlertCircle, CheckCircle2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Download, Printer, Copy, Check, ScanBarcode, CheckCircle2 } from 'lucide-react';
 import { Logo } from './Logo';
-import { Product, CartItem } from '../types';
+import { CartItem } from '../types';
 
 export interface ReceiptData {
   id: string;
@@ -10,8 +10,8 @@ export interface ReceiptData {
   time: string;
   total: string;
   items: number;
-  products: CartItem[]; // Changed from Product to CartItem array
-  status: string; // Display status text
+  products: CartItem[];
+  status: string;
   method: string;
   
   // New Fields for enhanced receipt states
@@ -22,8 +22,6 @@ export interface ReceiptData {
   // Custom Feeds
   customerName?: string;
   address?: string;
-  imei?: string;
-  serial?: string;
 }
 
 interface ReceiptModalProps {
@@ -33,6 +31,8 @@ interface ReceiptModalProps {
 }
 
 export const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, data }) => {
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
   if (!isOpen || !data) return null;
 
   // Determine Title based on payment status
@@ -53,6 +53,12 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, dat
             {text}
         </div>
     );
+  };
+
+  const handleCopyImei = (imei: string, id: string) => {
+      navigator.clipboard.writeText(imei);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
   };
 
   return (
@@ -88,7 +94,15 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, dat
 
               {/* Header */}
               <div className="flex justify-between items-start mb-8 mt-2 relative z-10">
-                 <Logo className="h-6 w-auto text-gray-900" />
+                 <div>
+                    <Logo className="h-8 w-auto text-gray-900 mb-3" />
+                    <div className="text-xs text-gray-500 leading-relaxed font-medium">
+                        <p className="font-bold text-gray-900">Ogabassey Ltd.</p>
+                        <p>2 Olaide Tomori St, Ikeja</p>
+                        <p>Lagos, Nigeria</p>
+                        <p>+234 814 697 8921</p>
+                    </div>
+                 </div>
                  <div className="text-right">
                     <p className={`text-xs font-bold uppercase tracking-widest mb-1 ${data.paymentStatus === 'unpaid' ? 'text-red-600' : 'text-gray-400'}`}>
                         {documentTitle}
@@ -124,12 +138,12 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, dat
                  </div>
               </div>
 
-              {/* Line Items */}
-              <div className="mb-8 relative z-10">
+              {/* Product Details with Per-Item IMEI */}
+              <div className="mb-6 relative z-10">
                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Product Details</p>
                  <div className="space-y-3">
                     {data.products.map((item, index) => (
-                        <div key={index} className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                        <div key={index} className="bg-gray-50 rounded-lg p-3 border border-gray-100 relative group">
                             <div className="flex justify-between items-start mb-2">
                                 <div>
                                     <p className="font-bold text-sm text-gray-900 line-clamp-1">{item.name}</p>
@@ -137,19 +151,34 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, dat
                                 </div>
                                 <p className="font-bold text-sm text-gray-900">{item.price}</p>
                             </div>
-                            {/* Customizable Feeds */}
-                            <div className="mt-2 pt-2 border-t border-gray-200 flex flex-wrap gap-x-6 gap-y-2">
+                            
+                            {/* Specs */}
+                            <div className="flex flex-wrap gap-x-6 gap-y-1 mt-1 text-xs text-gray-500">
                                 {(item.selectedColor) && (
-                                    <div className="text-xs">
-                                        <span className="text-gray-400">Color:</span> <span className="text-gray-700 font-medium">{item.selectedColor}</span>
-                                    </div>
+                                    <span>Color: <span className="text-gray-700 font-medium">{item.selectedColor}</span></span>
                                 )}
                                 {(item.selectedStorage) && (
-                                    <div className="text-xs">
-                                        <span className="text-gray-400">Storage:</span> <span className="text-gray-700 font-medium">{item.selectedStorage}</span>
-                                    </div>
+                                    <span>Storage: <span className="text-gray-700 font-medium">{item.selectedStorage}</span></span>
                                 )}
                             </div>
+
+                            {/* Per-Device IMEI/Serial */}
+                            {item.imei && (
+                                <div className="mt-3 pt-2 border-t border-gray-200 flex items-center justify-between">
+                                    <div className="flex items-center gap-1.5">
+                                        <ScanBarcode size={12} className="text-gray-400" />
+                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">IMEI/SN:</span>
+                                        <span className="font-mono text-xs font-bold text-gray-800 tracking-wide select-all">{item.imei}</span>
+                                    </div>
+                                    <button 
+                                        onClick={() => handleCopyImei(item.imei!, item.cartItemId)}
+                                        className="text-[10px] font-bold text-red-600 hover:bg-red-50 px-2 py-1 rounded transition-colors flex items-center gap-1"
+                                    >
+                                        {copiedId === item.cartItemId ? <Check size={10} /> : <Copy size={10} />}
+                                        {copiedId === item.cartItemId ? 'Copied' : 'Copy'}
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ))}
                  </div>
@@ -182,8 +211,11 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, dat
 
               {/* Footer */}
               <div className="text-center relative z-10">
+                 <p className="text-xs text-gray-500 mb-3 max-w-xs mx-auto leading-relaxed">
+                    We want you to love your device! If you experience any issues, please reach out to us within 14 days. We are here to help.
+                 </p>
                  <p className="text-[10px] text-gray-400 mb-2">Questions regarding this {documentTitle.toLowerCase()}?</p>
-                 <p className="text-xs font-bold text-red-600">help@ogabassey.com • +234 814 697 8921</p>
+                 <p className="text-xs font-bold text-red-600">support@ogabassey.com • +234 814 697 8921</p>
               </div>
            </div>
         </div>

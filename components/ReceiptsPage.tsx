@@ -4,6 +4,7 @@ import { FileText, Download, Search, CheckCircle2, ChevronRight, CreditCard, Ext
 import { ReceiptModal, ReceiptData } from './ReceiptModal';
 import { EmptyState } from './EmptyState';
 import { useOrder } from '../contexts/OrderContext';
+import { products } from '../data/products';
 
 export const ReceiptsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -11,8 +12,31 @@ export const ReceiptsPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { orders } = useOrder();
 
+  // --- SIMULATION: Create a 5-item receipt for demonstration ---
+  const simulatedMultiItemReceipt: ReceiptData = {
+      id: "OG-BULK-DEMO",
+      date: "May 20, 2024",
+      time: "09:45 AM",
+      total: "₦7,100,000",
+      items: 5,
+      products: [
+          { ...products[0], cartItemId: 'sim-1', quantity: 1, selectedColor: 'Natural Titanium', selectedStorage: '1TB', imei: "356982041567890" },
+          { ...products[1], cartItemId: 'sim-2', quantity: 1, selectedColor: 'Midnight', selectedStorage: '512GB', imei: "359821051234567" },
+          { ...products[2], cartItemId: 'sim-3', quantity: 1, selectedStorage: '1TB', imei: "352211009988776" },
+          { ...products[3], cartItemId: 'sim-4', quantity: 1, selectedColor: 'Titanium', imei: "K293847561029" },
+          { ...products[8], cartItemId: 'sim-5', quantity: 1, selectedColor: 'Titanium Black', selectedStorage: '512GB', imei: "357711223344556" }
+      ],
+      status: "Paid",
+      method: "Bank Transfer",
+      customerName: "Alex Doe",
+      address: "2 Olaide Tomori St, Ikeja, Lagos",
+      paymentStatus: 'paid',
+      amountPaid: "₦7,100,000",
+      balance: "₦0",
+  };
+
   // Transform Orders to Receipts
-  const receipts: ReceiptData[] = orders.map(order => {
+  const orderReceipts: ReceiptData[] = orders.map(order => {
       let paymentStatus: 'unpaid' | 'partially_paid' | 'paid' = 'paid';
       let statusText = 'Paid';
       let balance = '₦0';
@@ -41,22 +65,31 @@ export const ReceiptsPage: React.FC = () => {
           }
       }
 
+      // Attach mock IMEIs to products for demonstration
+      const itemsWithImei = order.items.map((item, index) => ({
+          ...item,
+          imei: `35698204${Math.floor(1000000 + Math.random() * 9000000)}` // Random mock IMEI
+      }));
+
       return {
           id: order.id,
           date: order.date,
           time: order.time,
           total: order.total,
           items: order.items.reduce((acc, item) => acc + item.quantity, 0),
-          products: order.items,
+          products: itemsWithImei,
           status: statusText,
           method: order.walletDeduction && order.walletDeduction > 0 ? `Wallet + ${order.paymentMethod}` : order.paymentMethod,
           customerName: "Alex Doe", // Mock user name
           address: order.shippingAddress,
           paymentStatus: paymentStatus,
           amountPaid: amountPaid,
-          balance: balance
+          balance: balance,
       };
   });
+
+  // Combine simulated receipt with actual order receipts
+  const receipts = [simulatedMultiItemReceipt, ...orderReceipts];
 
   // Search Logic
   const filteredReceipts = receipts.filter(receipt => {

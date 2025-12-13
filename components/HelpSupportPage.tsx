@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { HelpCircle, Search, ChevronDown, ChevronUp, Truck, RefreshCw, CreditCard, Smartphone, Mail, Phone, MessageSquare, ExternalLink } from 'lucide-react';
 import { useChat } from '../contexts/ChatContext';
@@ -138,9 +139,9 @@ export const HelpSupportPage: React.FC = () => {
                                     <Phone size={18} className="text-red-500" />
                                     <span className="font-medium text-sm">+234 814 697 8921</span>
                                 </a>
-                                <a href="mailto:help@ogabassey.com" className="flex items-center gap-3 p-3 bg-white/10 rounded-xl hover:bg-white/20 transition-colors border border-white/5">
+                                <a href="mailto:support@ogabassey.com" className="flex items-center gap-3 p-3 bg-white/10 rounded-xl hover:bg-white/20 transition-colors border border-white/5">
                                     <Mail size={18} className="text-red-500" />
-                                    <span className="font-medium text-sm">help@ogabassey.com</span>
+                                    <span className="font-medium text-sm">support@ogabassey.com</span>
                                 </a>
                                 <button 
                                     onClick={openChat}

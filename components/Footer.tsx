@@ -55,6 +55,8 @@ export const Footer: React.FC = () => {
                     <li><Link to="/swap" className="hover:text-red-500">Sell Device</Link></li>
                     <li><Link to="/orders" className="hover:text-red-500">Track Order</Link></li>
                     <li><Link to="/help" className="hover:text-red-500">Support</Link></li>
+                    <li><Link to="/warranty" className="hover:text-red-500">Warranty Policy</Link></li>
+                    <li><Link to="/return-policy" className="hover:text-red-500">Return Policy</Link></li>
                 </ul>
             </div>
           </div>
@@ -73,7 +75,7 @@ export const Footer: React.FC = () => {
                </li>
                <li className="flex items-center gap-2">
                  <Mail className="shrink-0 text-red-600" size={16} />
-                 <span>help@ogabassey.com</span>
+                 <span>support@ogabassey.com</span>
                </li>
              </ul>
           </div>

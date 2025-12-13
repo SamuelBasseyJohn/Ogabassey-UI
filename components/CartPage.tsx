@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Minus, Plus, Trash2, ArrowRight, HandCoins, Check, Calculator, ShieldCheck, ShoppingCart, ArrowLeft, Info, Ticket, Gift, PenLine } from 'lucide-react';
+import { Minus, Plus, Trash2, ArrowRight, HandCoins, Check, Calculator, ShieldCheck, ShoppingCart, ArrowLeft, Info, Ticket, Gift, PenLine, FileText, Building2 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { AdUnit } from './AdUnit';
@@ -8,6 +8,7 @@ import { NegotiationModal } from './NegotiationModal';
 import { EmptyState } from './EmptyState';
 import { CartItem } from '../types';
 import { GiftModal, GiftData } from './GiftModal';
+import { InvoiceModal, InvoiceOrderData } from './InvoiceModal';
 
 interface NegotiationState {
     isOpen: boolean;
@@ -25,6 +26,12 @@ export const CartPage: React.FC = () => {
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
   const [giftData, setGiftData] = useState<GiftData | null>(null);
   const navigate = useNavigate();
+
+  // Invoice State (formerly Pro Forma)
+  const [isProFormaModalOpen, setIsProFormaModalOpen] = useState(false);
+  const [isProFormaInputOpen, setIsProFormaInputOpen] = useState(false);
+  const [proFormaData, setProFormaData] = useState<{order: InvoiceOrderData | null, companyName: string}>({ order: null, companyName: '' });
+  const [companyDetails, setCompanyDetails] = useState({ name: '', address: '' });
 
   // Scroll to top on mount
   useEffect(() => {
@@ -98,6 +105,32 @@ export const CartPage: React.FC = () => {
   const handleProceedToCheckout = () => {
       // Pass gift wrapping cost as state if needed, or rely on context if you were to move gift state to context
       navigate('/checkout', { state: { giftWrappingCost: giftData?.wrappingCost || 0 } });
+  };
+
+  const handleGenerateProForma = () => {
+      // Create a temporary order object from cart data
+      const orderId = `INV-2024-${Math.floor(1000 + Math.random() * 9000)}`;
+      const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      
+      // Use address from input or default
+      const shippingAddr = companyDetails.address || "2 Olaide Tomori St, Ikeja, Lagos";
+
+      const tempOrder: InvoiceOrderData = {
+          id: orderId,
+          date: date,
+          time: time,
+          total: `₦${totalWithExtras.toLocaleString()}`,
+          status: 'Pending',
+          paymentMethod: 'Bank Transfer',
+          shippingAddress: shippingAddr,
+          items: cartItems,
+          companyName: companyDetails.name
+      };
+
+      setProFormaData({ order: tempOrder, companyName: companyDetails.name });
+      setIsProFormaInputOpen(false); // Close input modal
+      setIsProFormaModalOpen(true);  // Open preview modal
   };
 
   return (
@@ -390,6 +423,15 @@ export const CartPage: React.FC = () => {
                                 Negotiate Total
                             </button>
 
+                            {/* Invoice Button */}
+                            <button 
+                                onClick={() => setIsProFormaInputOpen(true)}
+                                className="w-full bg-gray-100 text-gray-700 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors border border-gray-200 hover:bg-gray-200 active:scale-[0.98]"
+                            >
+                                <FileText size={18} />
+                                Get Invoice / Quote
+                            </button>
+
                             <button 
                                 onClick={handleProceedToCheckout}
                                 className="w-full bg-red-600 md:hover:bg-red-700 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg md:hover:shadow-red-200 group active:scale-[0.98] active:shadow-none"
@@ -428,6 +470,60 @@ export const CartPage: React.FC = () => {
         onClose={handleGiftModalClose}
         onSave={handleGiftSave}
         cartItems={cartItems}
+      />
+
+      {/* Invoice Input Modal (formerly Pro Forma) */}
+      {isProFormaInputOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsProFormaInputOpen(false)}></div>
+              <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl relative z-10 animate-in zoom-in-95 duration-200">
+                  <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+                      <h3 className="font-bold text-gray-900">Invoice Details</h3>
+                      <button onClick={() => setIsProFormaInputOpen(false)}><ArrowLeft size={20} className="text-gray-500" /></button>
+                  </div>
+                  <div className="p-6 space-y-4">
+                      <p className="text-sm text-gray-500 mb-2">
+                          Enter your company details to generate an invoice for payment approval.
+                      </p>
+                      <div>
+                          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">Company / Billed To Name</label>
+                          <div className="relative">
+                              <input 
+                                  type="text" 
+                                  value={companyDetails.name}
+                                  onChange={(e) => setCompanyDetails({...companyDetails, name: e.target.value})}
+                                  placeholder="e.g. Acme Corp" 
+                                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+                              />
+                              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                          </div>
+                      </div>
+                      <div>
+                          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">Address (Optional)</label>
+                          <textarea 
+                              value={companyDetails.address}
+                              onChange={(e) => setCompanyDetails({...companyDetails, address: e.target.value})}
+                              placeholder="Company address..." 
+                              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm resize-none h-20"
+                          />
+                      </div>
+                      <button 
+                          onClick={handleGenerateProForma}
+                          className="w-full bg-gray-900 hover:bg-black text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-95 mt-2"
+                      >
+                          Generate Invoice
+                      </button>
+                  </div>
+              </div>
+          </div>
+      )}
+
+      {/* Invoice Modal (Used for Preview) */}
+      <InvoiceModal 
+        isOpen={isProFormaModalOpen} 
+        onClose={() => setIsProFormaModalOpen(false)} 
+        order={proFormaData.order} 
+        mode="proforma"
       />
     </div>
   );
